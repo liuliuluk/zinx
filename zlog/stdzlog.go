@@ -1,63 +1,75 @@
+// Package zlog 主要提供zinx相关日志记录接口
+// 包括:
+//		stdzlog模块， 提供全局日志方法
+//		zlogger模块,  日志内部定义协议，均为对象类方法
+//
+// 当前文件描述:
+// @Title  stdzlog.go
+// @Description    包裹zlogger日志方法，提供全局方法
+// @Author  Aceld - Thu Mar 11 10:32:29 CST 2019
 package zlog
 
 /*
    全局默认提供一个Log对外句柄，可以直接使用API系列调用
    全局日志对象 StdZinxLog
- */
+*/
 
 import "os"
 
+//StdZinxLog 创建全局log
 var StdZinxLog = NewZinxLog(os.Stderr, "", BitDefault)
 
-//获取StdZinxLog 标记位
+//Flags 获取StdZinxLog 标记位
 func Flags() int {
 	return StdZinxLog.Flags()
 }
 
-//设置StdZinxLog标记位
+//ResetFlags 设置StdZinxLog标记位
 func ResetFlags(flag int) {
 	StdZinxLog.ResetFlags(flag)
 }
 
-//添加flag标记
+//AddFlag 添加flag标记
 func AddFlag(flag int) {
 	StdZinxLog.AddFlag(flag)
 }
 
-//设置StdZinxLog 日志头前缀
+//SetPrefix 设置StdZinxLog 日志头前缀
 func SetPrefix(prefix string) {
 	StdZinxLog.SetPrefix(prefix)
 }
 
-//设置StdZinxLog绑定的日志文件
+//SetLogFile 设置StdZinxLog绑定的日志文件
 func SetLogFile(fileDir string, fileName string) {
 	StdZinxLog.SetLogFile(fileDir, fileName)
 }
 
-//设置关闭debug
+//CloseDebug 设置关闭debug
 func CloseDebug() {
 	StdZinxLog.CloseDebug()
 }
 
-//设置打开debug
+//OpenDebug 设置打开debug
 func OpenDebug() {
 	StdZinxLog.OpenDebug()
 }
 
-// ====> Debug <====
+//Debugf ====> Debug <====
 func Debugf(format string, v ...interface{}) {
 	StdZinxLog.Debugf(format, v...)
 }
 
+//Debug Debug
 func Debug(v ...interface{}) {
 	StdZinxLog.Debug(v...)
 }
 
-// ====> Info <====
+//Infof ====> Info <====
 func Infof(format string, v ...interface{}) {
 	StdZinxLog.Infof(format, v...)
 }
 
+//Info -
 func Info(v ...interface{}) {
 	StdZinxLog.Info(v...)
 }

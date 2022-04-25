@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"net"
-	"zinx/znet"
+
+	"github.com/aceld/zinx/znet"
 )
 
 func main() {
@@ -19,7 +20,7 @@ func main() {
 
 	//封装一个msg1包
 	msg1 := &znet.Message{
-		Id:      0,
+		ID:      0,
 		DataLen: 5,
 		Data:    []byte{'h', 'e', 'l', 'l', 'o'},
 	}
@@ -31,7 +32,7 @@ func main() {
 	}
 
 	msg2 := &znet.Message{
-		Id:      1,
+		ID:      1,
 		DataLen: 7,
 		Data:    []byte{'w', 'o', 'r', 'l', 'd', '!', '!'},
 	}
@@ -50,5 +51,3 @@ func main() {
 	//客户端阻塞
 	select {}
 }
-
-

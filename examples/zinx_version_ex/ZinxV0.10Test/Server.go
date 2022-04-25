@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"zinx/ziface"
-	"zinx/znet"
+	"github.com/aceld/zinx/ziface"
+	"github.com/aceld/zinx/znet"
 )
 
 //ping test 自定义路由
@@ -57,7 +57,7 @@ func DoConnectionBegin(conn ziface.IConnection) {
 //连接断开的时候执行
 func DoConnectionLost(conn ziface.IConnection) {
 	//在连接销毁之前，查询conn的Name，Home属性
-	if name, err:= conn.GetProperty("Name"); err == nil {
+	if name, err := conn.GetProperty("Name"); err == nil {
 		fmt.Println("Conn Property Name = ", name)
 	}
 

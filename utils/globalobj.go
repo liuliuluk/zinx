@@ -1,11 +1,22 @@
+// Package utils 提供zinx相关工具类函数
+// 包括:
+//		全局配置
+//		配置文件加载
+//
+// 当前文件描述:
+// @Title  globalobj.go
+// @Description  相关配置文件定义及加载方式
+// @Author  Aceld - Thu Mar 11 10:32:29 CST 2019
 package utils
 
 import (
 	"encoding/json"
+	"github.com/aceld/zinx/utils/commandline/args"
+	"github.com/aceld/zinx/utils/commandline/uflag"
+	"github.com/aceld/zinx/ziface"
+	"github.com/aceld/zinx/zlog"
 	"io/ioutil"
 	"os"
-	"zinx/ziface"
-	"zinx/zlog"
 )
 
 /*
@@ -16,9 +27,9 @@ type GlobalObj struct {
 	/*
 		Server
 	*/
-	TcpServer ziface.IServer //当前Zinx的全局Server对象
+	TCPServer ziface.IServer //当前Zinx的全局Server对象
 	Host      string         //当前服务器主机IP
-	TcpPort   int            //当前服务器主机监听端口号
+	TCPPort   int            //当前服务器主机监听端口号
 	Name      string         //当前服务器名称
 
 	/*
@@ -49,7 +60,7 @@ type GlobalObj struct {
 */
 var GlobalObject *GlobalObj
 
-//判断一个文件是否存在
+//PathExists 判断一个文件是否存在
 func PathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
@@ -61,7 +72,7 @@ func PathExists(path string) (bool, error) {
 	return false, err
 }
 
-//读取用户的配置文件
+//Reload 读取用户的配置文件
 func (g *GlobalObj) Reload() {
 
 	if confFileExists, _ := PathExists(g.ConfFilePath); confFileExists != true {
@@ -92,23 +103,37 @@ func (g *GlobalObj) Reload() {
 	提供init方法，默认加载
 */
 func init() {
+	pwd, err := os.Getwd()
+	if err != nil {
+		pwd = "."
+	}
+
+	// 初始化配置模块flag
+	args.InitConfigFlag( pwd + "/conf/zinx.json","配置文件，如果没有设置，则默认为<exeDir>/conf/zinx.json")
+	// 初始化日志模块flag TODO
+	// 解析
+	uflag.Parse()
+	// 解析之后的操作
+	args.FlagHandle()
+
 	//初始化GlobalObject变量，设置一些默认值
 	GlobalObject = &GlobalObj{
 		Name:             "ZinxServerApp",
-		Version:          "V0.11",
-		TcpPort:          8999,
+		Version:          "V1.0",
+		TCPPort:          8999,
 		Host:             "0.0.0.0",
 		MaxConn:          12000,
 		MaxPacketSize:    4096,
-		ConfFilePath:     "conf/zinx.json",
+		ConfFilePath:     args.Args.ConfigFile ,
 		WorkerPoolSize:   10,
 		MaxWorkerTaskLen: 1024,
 		MaxMsgChanLen:    1024,
-		LogDir:           "./log",
+		LogDir:           pwd + "/log",
 		LogFile:          "",
 		LogDebugClose:    false,
 	}
 
-	//从配置文件中加载一些用户配置的参数
+	//NOTE: 从配置文件中加载一些用户配置的参数
 	GlobalObject.Reload()
 }
+

@@ -1,3 +1,12 @@
+// Package zlog 主要提供zinx相关日志记录接口
+// 包括:
+//		stdzlog模块， 提供全局日志方法
+//		zlogger模块,  日志内部定义协议，均为对象类方法
+//
+// 当前文件描述:
+// @Title  zlogger.go
+// @Description    基础日志接口，包括Debug、Fatal等
+// @Author  Aceld - Thu Mar 11 10:32:29 CST 2019
 package zlog
 
 /*
@@ -25,9 +34,9 @@ const (
 	BitDate         = 1 << iota                            //日期标记位  2019/01/23
 	BitTime                                                //时间标记位  01:23:12
 	BitMicroSeconds                                        //微秒级标记位 01:23:12.111222
-	BitLongFile                                            // 完整文件名称 /home/go/src/zinx/server.go
-	BitShortFile                                           // 最后文件名   server.go
-	BitLevel                                               // 当前日志级别： 0(Debug), 1(Info), 2(Warn), 3(Error), 4(Panic), 5(Fatal)
+	BitLongFile                                            //完整文件名称 /home/go/src/zinx/server.go
+	BitShortFile                                           //最后文件名   server.go
+	BitLevel                                               //当前日志级别： 0(Debug), 1(Info), 2(Warn), 3(Error), 4(Panic), 5(Fatal)
 	BitStdFlag      = BitDate | BitTime                    //标准头部日志格式
 	BitDefault      = BitLevel | BitShortFile | BitStdFlag //默认日志头部格式
 )
@@ -53,22 +62,14 @@ var levels = []string{
 }
 
 type ZinxLogger struct {
-	//确保多协程读写文件，防止文件内容混乱，做到协程安全
-	mu     sync.Mutex
-	//每行log日志的前缀字符串,拥有日志标记
-	prefix string
-	//日志标记位
-	flag   int
-	//日志输出的文件描述符
-	out    io.Writer
-	//输出的缓冲区
-	buf    bytes.Buffer
-	//当前日志绑定的输出文件
-	file   *os.File
-	//是否打印调试debug信息
-	debugClose bool
-	//获取日志文件名和代码上述的runtime.Call 的函数调用层数
-	calldDepth	int
+	mu sync.Mutex 		//确保多协程读写文件，防止文件内容混乱，做到协程安全
+	prefix string 		//每行log日志的前缀字符串,拥有日志标记
+	flag int 			//日志标记位
+	out io.Writer 		//日志输出的文件描述符
+	buf bytes.Buffer 	//输出的缓冲区
+	file *os.File 		//当前日志绑定的输出文件
+	debugClose bool 	//是否打印调试debug信息
+	calldDepth int 		//获取日志文件名和代码上述的runtime.Call 的函数调用层数
 }
 
 /*
@@ -80,7 +81,7 @@ type ZinxLogger struct {
 func NewZinxLog(out io.Writer, prefix string, flag int) *ZinxLogger {
 
 	//默认 debug打开， calledDepth深度为2,ZinxLogger对象调用日志打印方法最多调用两层到达output函数
-	zlog := &ZinxLogger{out: out, prefix: prefix, flag: flag, file:nil, debugClose:false, calldDepth:2}
+	zlog := &ZinxLogger{out: out, prefix: prefix, flag: flag, file: nil, debugClose: false, calldDepth: 2}
 	//设置log对象 回收资源 析构方法(不设置也可以，go的Gc会自动回收，强迫症没办法)
 	runtime.SetFinalizer(zlog, CleanZinxLog)
 	return zlog
@@ -88,16 +89,16 @@ func NewZinxLog(out io.Writer, prefix string, flag int) *ZinxLogger {
 
 /*
    回收日志处理
- */
- func CleanZinxLog(log *ZinxLogger) {
- 	log.closeFile()
- }
-
+*/
+func CleanZinxLog(log *ZinxLogger) {
+	log.closeFile()
+}
 
 /*
    制作当条日志数据的 格式头信息
 */
-func (log *ZinxLogger) formatHeader(buf *bytes.Buffer, t time.Time, file string, line int, level int) {
+func (log *ZinxLogger) formatHeader(t time.Time, file string, line int, level int) {
+	var buf *bytes.Buffer = &log.buf
 	//如果当前前缀字符串不为空，那么需要先写前缀
 	if log.prefix != "" {
 		buf.WriteByte('<')
@@ -187,7 +188,7 @@ func (log *ZinxLogger) OutPut(level int, s string) error {
 	//清零buf
 	log.buf.Reset()
 	//写日志头
-	log.formatHeader(&log.buf, now, file, line, level)
+	log.formatHeader(now, file, line, level)
 	//写日志内容
 	log.buf.WriteString(s)
 	//补充回车
@@ -299,12 +300,11 @@ func (log *ZinxLogger) AddFlag(flag int) {
 }
 
 //设置日志的 用户自定义前缀字符串
-func (log *ZinxLogger) SetPrefix(prefix string){
+func (log *ZinxLogger) SetPrefix(prefix string) {
 	log.mu.Lock()
 	defer log.mu.Unlock()
 	log.prefix = prefix
 }
-
 
 //设置日志文件输出
 func (log *ZinxLogger) SetLogFile(fileDir string, fileName string) {
@@ -374,9 +374,9 @@ func mkdirLog(dir string) (e error) {
 
 //将一个整形转换成一个固定长度的字符串，字符串宽度应该是大于0的
 //要确保buffer是有容量空间的
-func itoa(buf *bytes.Buffer, i int, wid int) {
+func itoa(buf *bytes.Buffer, i int, wID int) {
 	var u uint = uint(i)
-	if u == 0 && wid <= 1 {
+	if u == 0 && wID <= 1 {
 		buf.WriteByte('0')
 		return
 	}
@@ -384,16 +384,15 @@ func itoa(buf *bytes.Buffer, i int, wid int) {
 	// Assemble decimal in reverse order.
 	var b [32]byte
 	bp := len(b)
-	for ; u > 0 || wid > 0; u /= 10 {
+	for ; u > 0 || wID > 0; u /= 10 {
 		bp--
-		wid--
+		wID--
 		b[bp] = byte(u%10) + '0'
 	}
 
-	// avoid slicing b to avoid an allocation.
+	// avoID slicing b to avoID an allocation.
 	for bp < len(b) {
 		buf.WriteByte(b[bp])
 		bp++
 	}
 }
-

@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"zinx/ziface"
-	"zinx/znet"
+
+	"github.com/aceld/zinx/ziface"
+	"github.com/aceld/zinx/znet"
 )
 
 //ping test 自定义路由
@@ -19,10 +20,10 @@ func (this *PingRouter) Handle(request ziface.IRequest) {
 
 	//回写数据
 	/*
-	_, err := request.GetConnection().GetTCPConnection().Write([]byte("ping...ping...ping\n"))
-	if err != nil {
-		fmt.Println("call back ping ping ping error")
-	}
+		_, err := request.GetConnection().GetTCPConnection().Write([]byte("ping...ping...ping\n"))
+		if err != nil {
+			fmt.Println("call back ping ping ping error")
+		}
 	*/
 	err := request.GetConnection().SendMsg(1, []byte("ping...ping...ping"))
 	if err != nil {
@@ -35,7 +36,7 @@ func main() {
 	s := znet.NewServer()
 
 	//配置路由
-	s.AddRouter(&PingRouter{})
+	s.AddRouter(5, &PingRouter{})
 
 	//开启服务
 	s.Serve()
